@@ -52,6 +52,12 @@ namespace Sapphire::Common::Util
   float dot( const FFXIVARR_POSITION3& vec1, const FFXIVARR_POSITION3& vec2 );
 
   FFXIVARR_POSITION3 projectY( const FFXIVARR_POSITION3& vec );
+
+  // Dichiarazione della nuova funzione per convertire la rotazione in un vettore direzionale
+  FFXIVARR_POSITION3 rotationToForwardVector( float rot_radians );
+
+  // Dichiarazione della nuova funzione per ottenere il vettore "destro"
+  FFXIVARR_POSITION3 rotationToRightVector( float rot_radians );
 }
 
 #endif

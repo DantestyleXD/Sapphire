@@ -24,6 +24,11 @@ namespace Sapphire::World::Action
     WrathIII = 95,
     WrathIV = 96,
     Infuriated = 97,
+    Featherfoot = 99,
+    OpoOpoForm = 107,
+    RaptorForm = 108,
+    CoeurlForm = 109,
+    GreasedLightning = 111,
     InnerBeast = 411,
     Deliverance = 729
   };

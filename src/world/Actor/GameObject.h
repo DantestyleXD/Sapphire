@@ -67,6 +67,10 @@ namespace Sapphire::Entity
 
     void setRot( float rot );
 
+    bool isPlayerBehindMe( const PlayerPtr pOtherGameObject, float behindAngleThreshold = 0.0f ) const;
+
+    bool isPlayerOnFlankOfMe( const PlayerPtr pPlayer, float flankAngleThreshold = 0.707f ) const;
+
     bool isChara() const;
 
     bool isPlayer() const;

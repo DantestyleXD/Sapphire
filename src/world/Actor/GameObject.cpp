@@ -95,6 +95,97 @@ void GameObject::setRot( float rot )
   m_rot = rot;
 }
 
+bool GameObject::isPlayerBehindMe( const PlayerPtr pPlayer, float behindAngleThreshold ) const
+{
+  if( !pPlayer )
+  {
+    return false;// Oggetto nullo non può essere dietro.
+  }
+
+  // 1. Ottieni le posizioni
+  const FFXIVARR_POSITION3& posSource = getPos();                  // Posizione dell'NPC (questo oggetto)
+  const FFXIVARR_POSITION3& posPlayer = pPlayer->getPos();// Posizione dell'altro oggetto (Giocatore)
+
+  // 2. Calcola il vettore dal Giocatore all'NPC
+  FFXIVARR_POSITION3 vecPlayerToSource = posSource - posPlayer;// Utilizza l'operatore - definito per FFXIVARR_POSITION3
+
+  // 3. Ottieni il vettore di direzione "in avanti" dell'NPC
+  FFXIVARR_POSITION3 dirSource = Util::rotationToForwardVector( getRot() );// Rotazione dell'NPC
+
+  // OPZIONALE: Proietta entrambi i vettori sul piano XZ (ignorando l'altezza Y)
+  // Questo è comune per la logica "dietro/davanti" in giochi con movimento orizzontale prevalente.
+  dirSource = Util::projectY( dirSource );                // Utilizza la funzione projectY da UtilMath
+  vecPlayerToSource = Util::projectY( vecPlayerToSource );// Utilizza la funzione projectY da UtilMath
+
+  // Normalizza entrambi i vettori. Cruciale per il prodotto scalare.
+  dirSource = Util::normalize( dirSource );                // Utilizza la funzione normalize da UtilMath
+  vecPlayerToSource = Util::normalize( vecPlayerToSource );// Utilizza la funzione normalize da UtilMath
+
+  // 4. Calcola il Prodotto Scalare (Dot Product)
+  float dotProduct = Util::dot( dirSource, vecPlayerToSource );// Utilizza la funzione dot da UtilMath
+
+  // 5. Condizione finale: solo il controllo dell'angolo
+  if( dotProduct < behindAngleThreshold )
+  {
+    return true;// L'altro GameObject è dietro questo NPC in termini di orientamento.
+  }
+
+  return false;
+}
+
+// Implementazione del nuovo metodo isGameObjectOnFlankOfMe
+bool GameObject::isPlayerOnFlankOfMe( const PlayerPtr pPlayer, float flankAngleThreshold ) const
+{
+  if( !pPlayer )
+  {
+    return false;// Oggetto nullo.
+  }
+
+  // 1. Ottieni le posizioni
+  const FFXIVARR_POSITION3& posSource = getPos();                  // Posizione dell'NPC (questo oggetto)
+  const FFXIVARR_POSITION3& posPlayer = pPlayer->getPos();// Posizione dell'altro oggetto (Giocatore)
+
+  // 2. Calcola il vettore dal Giocatore all'NPC
+  FFXIVARR_POSITION3 vecPlayerToSource = posSource - posPlayer;
+
+  // 3. Ottieni il vettore di direzione "laterale destra" dell'NPC
+  // Useremo la rotazione dell'NPC per ottenere il suo vettore "destro".
+  FFXIVARR_POSITION3 dirSourceRight = Util::rotationToRightVector( getRot() );
+
+  // Proietta entrambi i vettori sul piano XZ (ignorando l'altezza Y)
+  dirSourceRight = Util::projectY( dirSourceRight );
+  vecPlayerToSource = Util::projectY( vecPlayerToSource );
+
+  // Normalizza entrambi i vettori. Cruciale per il prodotto scalare.
+  dirSourceRight = Util::normalize( dirSourceRight );
+  vecPlayerToSource = Util::normalize( vecPlayerToSource );
+
+  // 4. Calcola il Prodotto Scalare (Dot Product)
+  float dotProduct = Util::dot( dirSourceRight, vecPlayerToSource );
+
+  // 5. Condizione finale: il giocatore è ai fianchi se il prodotto scalare
+  // è sufficientemente vicino al vettore laterale (in positivo o negativo).
+  // Usiamo std::abs per verificare sia il fianco destro che quello sinistro.
+  // Un dotProduct di 0 significherebbe esattamente laterale.
+  // flankAngleThreshold definisce quanto "ampia" è la zona laterale.
+  // Se dotProduct è vicino a 1 (o -1), significa che i vettori sono allineati (o opposti).
+  // Se è vicino a 0, significa che sono quasi perpendicolari.
+  // Qui vogliamo che l'angolo sia vicino a 90 gradi (o -90 gradi) rispetto al vettore forward.
+  // Oppure, visto dal vettore RIGHT, che sia abbastanza allineato.
+  // Il flankAngleThreshold dovrebbe essere un valore positivo tra 0 e 1.
+  // Ad esempio, 0.707f (cos(45 gradi)) significa che l'angolo tra vecPlayerToSource e dirSourceRight
+  // deve essere tra 0 e 45 gradi (o 135 e 180) per essere considerato "laterale".
+  if( std::abs( dotProduct ) > flankAngleThreshold )
+  {
+    // Se il valore assoluto del dot product è maggiore della soglia,
+    // significa che il giocatore è abbastanza allineato con il vettore "destro"
+    // o con il vettore "sinistro" (che è l'opposto del destro).
+    return true;
+  }
+
+  return false;
+}
+
 bool GameObject::isChara() const
 {
   return isPlayer() || isBattleNpc() || isEventNpc() || isRetainer() || isCompanion();

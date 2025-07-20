@@ -163,3 +163,35 @@ FFXIVARR_POSITION3 Util::projectY( const FFXIVARR_POSITION3& vec )
 {
   return FFXIVARR_POSITION3{ vec.x, 0, vec.z };
 }
+
+// Implementazione della nuova funzione rotationToForwardVector
+FFXIVARR_POSITION3 Util::rotationToForwardVector( float rot_radians )
+{
+  // IMPORTANTISSIMO: verifica la tua convenzione di rotazione per getRot()!
+  // Questa formula assume che 0 radianti significhi guardare lungo l'asse Z positivo,
+  // e la rotazione avvenga attorno all'asse Y (l'asse "up").
+  //
+  // Se la tua convenzione è che 0 radianti punta lungo l'asse X positivo,
+  // e la rotazione avviene attorno all'asse Y, usa questa riga:
+  // return {std::cos(rot_radians), 0.0f, std::sin(rot_radians)};
+
+  // Per la convenzione Z-forward:
+  return { std::sin( rot_radians ), 0.0f, std::cos( rot_radians ) };
+}
+
+FFXIVARR_POSITION3 Util::rotationToRightVector( float rot_radians )
+{
+  // Questa implementazione dipende dalla convenzione di rotationToForwardVector.
+  // Se rotationToForwardVector(rot) produce {sin(rot), 0, cos(rot)} (Z-forward):
+  // Il vettore destro sarà ruotato di -PI/2 (o +PI/2 a seconda del sistema di coordinate)
+  // dal vettore forward.
+  // Dalla formula standard (cos(theta - PI/2), sin(theta - PI/2)) per (x,z)
+  // che è (sin(theta), -cos(theta)).
+  // Quindi per Z-forward {sin(rot), 0, cos(rot)}, il 'right' è {cos(rot), 0, -sin(rot)} (se X è right)
+  // O {cos(rot), 0, -sin(rot)} se X è right e Z forward.
+  // Se la tua convenzione per 0 radianti è (0,0,1) e l'angolo aumenta in senso antiorario (verso X+):
+  return { std::cos( rot_radians ), 0.0f, -std::sin( rot_radians ) };// Vettore destro basato su Z-forward (0,0,1)
+
+  // Se rotationToForwardVector(rot) produce {cos(rot), 0, sin(rot)} (X-forward):
+  // return {-std::sin(rot_radians), 0.0f, std::cos(rot_radians)};
+}
