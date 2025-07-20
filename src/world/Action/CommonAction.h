@@ -29,6 +29,7 @@ namespace Sapphire::World::Action
     RaptorForm = 108,
     CoeurlForm = 109,
     GreasedLightning = 111,
+    StraightShot = 130,
     InnerBeast = 411,
     Deliverance = 729
   };

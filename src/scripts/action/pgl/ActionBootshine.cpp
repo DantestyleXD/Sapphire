@@ -1,6 +1,7 @@
 #include <Script/NativeScriptApi.h>
 #include <ScriptObject.h>
 #include <Actor/Player.h>
+#include <Actor/BNpc.h>
 #include <Action/CommonAction.h>
 #include <Action/Action.h>
 #include <StatusEffect/StatusEffect.h>
@@ -34,15 +35,22 @@ public:
 
     if (statusOpo != nullptr && pTarget->isPlayerBehindMe(pPlayer, -0.5f))
     {
-      //statusOpo->setModifier( Common::ParamModifier::CriticalHitPercent, 1 );
       pPlayer->setStatValue( Common::BaseParam::CriticalHit, 100 );
     }
       
     auto dmg = action.calcDamage( Potency );
     pActionBuilder->damage( pSource, pTarget, dmg.first, dmg.second );
 
-    pTarget->changeTarget( pPlayer->getCharacterId() );
-    pPlayer->setInCombat( true );
+    // TEMP
+    // The real logic need to be implemented into pActionBuilder on damage method
+    if (pTarget->isBattleNpc())
+      pTarget->getAsBNpc()->hateListAdd( pPlayer, 1 );
+    // else pvp
+
+    if( !pPlayer->isInCombat() )
+      pPlayer->setInCombat( true );
+
+    ////////////////////////
 
     if( statusOpo != nullptr )
     {
