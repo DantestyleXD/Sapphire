@@ -31,11 +31,13 @@ public:
       return;
 
     auto statusOpo = pPlayer->getStatusEffectById( OpoOpoForm );
+    auto critModded = false;
     auto critRateVal = pPlayer->getStatValue( Common::BaseParam::CriticalHit );
 
     if (statusOpo != nullptr && pTarget->isPlayerBehindMe(pPlayer, -0.5f))
     {
-      pPlayer->setStatValue( Common::BaseParam::CriticalHit, 100 );
+      statusOpo->setModifier( Common::ParamModifier::CriticalHitPercent, 100 - pPlayer->getStatValue( Common::BaseParam::CriticalHit ) );
+      critModded = true;
     }
       
     auto dmg = action.calcDamage( Potency );
@@ -52,11 +54,11 @@ public:
 
     ////////////////////////
 
+    if( critModded )
+      statusOpo->delModifier( Common::ParamModifier::CriticalHitPercent );
+
     if( statusOpo != nullptr )
-    {
-      pPlayer->setStatValue( Common::BaseParam::CriticalHit, critRateVal );
       pPlayer->removeStatusEffect( OpoOpoForm );
-    }
 
     pActionBuilder->applyStatusEffectSelf( RaptorForm, 10000, 0 );
   }

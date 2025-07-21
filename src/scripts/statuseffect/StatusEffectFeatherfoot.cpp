@@ -22,8 +22,7 @@ public:
 
   void onExpire( Entity::Chara& actor ) override
   {
-    auto status = actor.getStatusEffectById( Featherfoot );
-    status->setModifier( Common::ParamModifier::EvasionPercent, -12 );
+    actor.getStatusEffectById( Featherfoot )->delModifier( Common::ParamModifier::EvasionPercent );
     actor.removeStatusEffectById( { Featherfoot } );
   }
 };
